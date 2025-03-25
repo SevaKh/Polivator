@@ -1,0 +1,1 @@
+It is logical to start diving into the world of robotics from the basics. Namely, from the understanding of finite automata as a basic mathematical abstraction, a model of a discrete device at each moment of time in one state out of many possible ones. The real physical embodiment of this project will be an autonomous irrigation system for indoor plants.
