@@ -2,9 +2,9 @@
 #include "LiquidCrystal_I2C.h"          
 
 
-#define solPin1 A1 // порт для подключения датчика
-#define solPin2 A2 // порт для подключения датчика
-#define solPin3 A3 // порт для подключения датчика
+#define solPin1 A0 // порт для подключения датчика
+#define solPin2 A1 // порт для подключения датчика
+#define solPin3 A2 // порт для подключения датчика
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 int s1min=565;
