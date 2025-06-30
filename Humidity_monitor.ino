@@ -1,84 +1,89 @@
+#include "LiquidCrystal_I2C.h"
 
-#include "LiquidCrystal_I2C.h"          
+// Порты подключения датчиков влажности почвы
+#define SOL_PIN1 A0
+#define SOL_PIN2 A1
+#define SOL_PIN3 A2
 
-
-#define solPin1 A0 // порт для подключения датчика
-#define solPin2 A1 // порт для подключения датчика
-#define solPin3 A2 // порт для подключения датчика
+// Адрес I2C-дисплея и размеры строки и столбца
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-int s1min=565;
-int s1max=289;
+// Значения диапазонов для каждого датчика
+struct SensorRange {
+  int min;
+  int max;
+};
 
-int s2min=558;
-int s2max=0;
+// Массив структур с диапазонами для всех трёх датчиков
+SensorRange ranges[] = {{565, 289}, {558, 0}, {1023, 480}};
 
-int s3min=1023;
-int s3max=480;
 void setup() {
-  Serial.begin(9600); // --------- Консоль ---------
-  while (! Serial) {
+  Serial.begin(9600); // Начало связи с последовательным монитором
+  while (!Serial) {
     delay(1);
   }
-  pinMode(solPin1, INPUT);
-  pinMode(solPin2, INPUT);
-  pinMode(solPin3, INPUT);
 
+  // Устанавливаем датчики на вход
+  for (int i = 0; i <= 2; ++i) {
+    pinMode(i + A0, INPUT);
+  }
 
+  // Инициализация LCD-экрана
   lcd.init();
   lcd.backlight();
-
-
-
 }
- 
+
 void loop() {
-  // считываем данные с датчика влажности почвы
-  int sol1 = analogRead(solPin1);
-   int sol2 = analogRead(solPin2);
-    int sol3 = analogRead(solPin3);
-  
-  Serial.print("D1-");
-  Serial.println(sol1);
-    Serial.print("D2-");
-  Serial.println(sol2);
-    Serial.print("D3-");
-  Serial.println(sol3);
-   Serial.println("---------------------------------");
-  // ждём 100 мс
- 
+  // Читаем показания с датчиков
+  int values[3];
+  for (int i = 0; i < 3; ++i) {
+    values[i] = analogRead(i + A0);
+  }
 
+  // Печать сырых данных в монитор порта
+  printRawValues(values);
 
-  lcd.setCursor(0, 0); // Устанавливаем положение курсора, 0-й, 0-я строка
-  lcd.print("Humidity sensor"); // Выводим текст
-lcd.setCursor(0, 1);
-lcd.print(sol1);
-  lcd.setCursor(4, 1);
-  lcd.print("/");
- 
-  lcd.setCursor(6, 1);
- lcd.print(sol2);
-  lcd.setCursor(10, 1);
-  lcd.print("/");
-  
-  lcd.setCursor(12, 1);
- lcd.print(sol3);
- 
- delay(3000);
-  lcd.clear();  //Чистим экран
-  lcd.setCursor(0, 0); // Устанавливаем положение курсора, 0-й, 0-я строка
-  lcd.print("Humidity in %"); // Выводим текст
-lcd.setCursor(0, 1);
-lcd.print(map(sol1, s1min, s1max, 0, 100));
-  lcd.setCursor(4, 1);
-  lcd.print("/");
-   lcd.setCursor(6, 1);
-lcd.print(map(sol2, s2min, s2max, 0, 100));
-  lcd.setCursor(10, 1);
-  lcd.print("/");
-    lcd.setCursor(12, 1);
- lcd.print(map(sol3, s3min, s3max, 0, 100));
- 
- delay(3000);
-  lcd.clear();  //Чистим экран
+  // Печать преобразованных процентов влажности на экране
+  printMappedValues(values);
+
+  delay(3000); // Пауза перед повторением цикла
+}
+
+// Функция вывода сырых данных на экран и в консоль
+void printRawValues(const int values[]) {
+  Serial.print("D1:");
+  Serial.println(values[0]);
+  Serial.print("D2:");
+  Serial.println(values[1]);
+  Serial.print("D3:");
+  Serial.println(values[2]);
+  Serial.println("------------------------");
+
+  lcd.setCursor(0, 0);
+  lcd.print("Humidity sensors");
+  lcd.setCursor(0, 1);
+  lcd.print(values[0]); lcd.print("/");
+  lcd.print(values[1]); lcd.print("/");
+  lcd.print(values[2]);
+
+  delay(3000);
+  lcd.clear();
+}
+
+// Преобразование сырого сигнала в проценты влажности и вывод на экран
+void printMappedValues(const int values[]) {
+  lcd.setCursor(0, 0);
+  lcd.print("Humidity in %");
+  lcd.setCursor(0, 1);
+
+  for (int i = 0; i < 3; ++i) {
+    int mappedValue = map(values[i], ranges[i].min, ranges[i].max, 0, 100);
+    lcd.print(mappedValue);
+    if (i < 2) {
+      lcd.print("/");
+    }
+  }
+
+  delay(3000);
+  lcd.clear();
 }
