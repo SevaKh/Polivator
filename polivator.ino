@@ -61,7 +61,6 @@ void updateDisplay() {
   display.showString(menuNames[currentMenuItem], 0);
 }
 
-
 void checkEncoderAndButton() {
   static unsigned long lastButtonPress = 0;
   bool buttonPressed = !digitalRead(BUTTON_PIN);
@@ -81,7 +80,6 @@ void changeMenuItem() {
   currentMenuItem++;
   if (currentMenuItem >= maxMenuItems) currentMenuItem = 0;
 }
-
 
 void processEncoderChange(int delta) {
   switch (currentMenuItem) {
